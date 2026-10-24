@@ -1,0 +1,1 @@
+$execute positioned $(x) $(y) $(z) as @n[distance=..0.5,tag=tess.loaded] at @s run $(command)

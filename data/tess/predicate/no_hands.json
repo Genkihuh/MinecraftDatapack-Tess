@@ -1,0 +1,14 @@
+{
+    "type": "entity_properties",
+    "entity": "this",
+    "predicate": {
+        "equipment": {
+            "mainhand": {
+                "items": "air"
+            },
+            "offhand": {
+                "items": "air"
+            }
+        }
+    }
+}
