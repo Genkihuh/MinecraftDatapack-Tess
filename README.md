@@ -3,7 +3,7 @@
 ### 1. 介绍
 自定义容器一直是mc原版模组编写里既重要又繁琐的一环。借助 Tess ，数据包和地图作者可以快速搭建自己的自定义容器逻辑，使自定义容器不再卡住编写进度，并将自定义容器变为通用性强、使用便捷的开发工具。
 
-数据包对应的 mc 版本为 $26.3$。[Github链接](https://github.com/Genkihuh/MinecraftDatapack-Tess)，[示例文件链接](https://wwawb.lanzoul.com/ic32T4arwked)，这个示例文件与下文给出的示例不太一样。
+数据包对应的 Minecraft 版本为 Java 版 26.3。[Github链接](https://github.com/Genkihuh/MinecraftDatapack-Tess)，[示例文件链接](https://github.com/Genkihuh/MinecraftDatapack-Tess.example)，这个示例文件与下文给出的示例不太一样。
 ### 2. 为什么自定义容器很重要？
 自定义容器，指由数据包控制的特定的容器（一般以箱子/木桶为载体），它主要用来模拟工作台以及更多扩展功能。
 
@@ -15,6 +15,10 @@
  Tess 提供了一个定义ui里各种组件功能的方法。简单地说，Tess 将组成ui的物品以功能分类，将它们视为不同功能的组件，不同组件的功能都可以在物品的 custom_data 里配置。Tess 还提供了一些封装指令和函数接口，力求轻量化、低卡顿的同时提供更高的扩展空间。
 ## 正文
 Tess 仅支持维护拥有 27 个槽位的木桶容器，但是通常这已经足够使用。本文不介绍功能的内部实现，仅介绍如何使用已经配置好的功能，并给出添加更多功能的指南。
+
+Tess 支持锁漏斗、漏斗矿车、防吞物品、自动刷新页面等基础功能，在此不多介绍。
+
+Tess 会在参数异常的时候报错，报错会发给所有**创造模式**的玩家。笔者写这个文档时，只制作了下文放置容器时的报错，其他部分的报错会陆续添加。
 
 约定：
 
@@ -95,7 +99,7 @@ Tess 仅支持维护拥有 27 个槽位的木桶容器，但是通常这已经�
 ```
 对于生成器组件 **generator** ，需要以下参数：
 
-```page_index```：页面索引。需要保证一个自定义容器中可能出现的各个生成器的索引不重复，否则会出现冲突。以自定义容器为执行者（使用上文的`machine`模式按钮，以及下文的函数接口），执行`scoreboard players get @s tess.current_index`来获取自定义容器当前的页面索引。
+```page_index```：页面索引。需要保证一个自定义容器中可能出现的各个生成器的索引不重复，否则会出现冲突。以自定义容器为执行者（方法有很多，如使用上文的`machine`模式按钮，以及下文的函数接口），执行`scoreboard players get @s tess.current_index`来获取自定义容器当前的页面索引。
 
 ```gui```：一个列表。列表内的元素是复合标签，列表每一项为`{"I":"战利品表ID"}`格式的对象。
 
@@ -115,7 +119,9 @@ Tess 通过加载战利品表来加载ui组件。```gui```内必须有 27 个元
 }
 
 ```
-对于跳转组件 **goto** ，需要参数```to```：一个 **generator** 的战利品表。Tess 保证从 A 页面跳转到 B 页面时，保存 A 页面的非ui物品，同时加载 B 页面已保存的物品。
+对于跳转组件 **goto** ，需要参数```to```：一个 **generator** 的战利品表。
+
+玩家点击 **goto** 组件后，会跳转到其指向的页面。Tess 保证从 A 页面跳转到 B 页面时，保存 A 页面的非ui物品，同时加载 B 页面已保存的物品。
 ```json
 "custom_data": {
   "tess": {
@@ -192,18 +198,31 @@ Tess 通过加载战利品表来加载ui组件。```gui```内必须有 27 个元
 
 ```
 `marker` 同样拥有参数，保存在`data.tess`里，以下是参数列表：
-|参数（每项都***必填***） |取值        |说明        |
+|参数|取值        |说明        |
 |:--------:|:--------:|:--------:|
-|model     |一个物品模型文件，或者一个原版物品的命名空间id|方块的模型|
+|home|一个生成器的战利品表|自定义容器的初始界面，这是**必填**的|
+|model     |一个物品模型，参考原版的物品组件`item_model`|方块的模型|
 |machine_loot|一个战利品表    |破坏自定义容器掉落的物品|
-|home      |一个生成器的战利品表|自定义容器的初始界面|
 |place_event|一个命令|放置容器执行的命令，执行者为自定义容器|
 |destroy_event|一个命令|破坏容器执行的命令，执行者为自定义容器|
 |open_sound|一个声音|打开容器的声音|
-|machine_name|json文本或字符串|自定义容器显示在箱子ui左上角的名称|
+|close_sound|一个声音|关闭容器的声音|
+|machine_name|json文本或字符串|自定义容器显示在容器页面左上角的名称|
 |tags|若干tag，形如"tag1,tag2,..."|追加到自定义容器对应的实体`item_display`中的Tags里|
+|brightness|一个复合标签|参考原版`item_display`的brightness数据，具体见下表|
 
-对于参数`place_event`,`destroy_event`和`tags`，它们可以为空字符串，但必须存在这个参数。
+|brightness的参数|取值        |说明        |
+|:--------:|:--------:|:--------:|
+|sky|0~15的整数|[天空光照](https://zh.minecraft.wiki/w/%E4%BA%AE%E5%BA%A6?variant=zh-cn#%E5%A4%A9%E7%A9%BA%E5%85%89%E7%85%A7)|
+|block|0~15的整数|[方块光照](https://zh.minecraft.wiki/w/%E4%BA%AE%E5%BA%A6?variant=zh-cn#%E6%96%B9%E5%9D%97%E5%85%89%E7%85%A7)|
+
+再次提醒：`home`参数是**必填**的。
+
+没有`model`不会报错，但是会默认为制箭台的模型。
+
+没有`machine_loot`也不报错，但是会默认为战利品表`minecraft:cherry_leaves`。
+
+没有`brightness`时，内部的`sky`和`block`默认为 0 。有`brightness`参数但省略了`sky`或`block`时，被省略的项默认为 $15$ 。其他参数不填写时默认无效果。
 
 示例 (战利品表名`eg:machine`) ：
 ```json
@@ -234,8 +253,12 @@ Tess 通过加载战利品表来加载ui组件。```gui```内必须有 27 个元
                       "place_event": "playsound block.amethyst_block.place block @a[distance=..16]",
                       "destroy_event": "playsound block.amethyst_block.break block @a[distance=..16]",
                       "open_sound": "block.enchantment_table.use",
+                      "close_sound": "block.copper_chest.close",
                       "machine_name": [{"text":"CustomName","color": "dark_blue"}],
-                      "tags":"eg.example1,eg.example2"
+                      "tags":"eg.example1,eg.example2",
+                      "brightness":{
+                        "sky":9,"block":9
+                      }
                     }
                   }
                 }
@@ -251,7 +274,7 @@ Tess 通过加载战利品表来加载ui组件。```gui```内必须有 27 个元
 ```
 
 ### 3. 函数接口
-Tess提供了多个函数接口。接口的形式为函数标签，它们的执行者均为自定义容器，故这里的接口可以接收 cmd 命令。请注意，**所有**通过 Tess 定义的容器都会执行接口的指令，因此你需要额外写一个判断来区分各容器。
+Tess 提供了多个函数接口。接口的形式为函数标签，它们的执行者均为自定义容器，故这里的接口可以接收 cmd 命令。请注意，**所有**通过 Tess 定义的容器都会执行接口的指令，因此你需要额外写一个判断来区分各容器。
 
 所有的接口都存储在`minecraft`命名空间下的`tags/function/tess`文件夹里。以下是所有接口函数标签：
 |函数标签      |触发时间      |
@@ -271,7 +294,7 @@ Tess 提供了一个封装好的函数组：`#tess:transfer`。执行者为玩�
 
 玩家每次按下按钮，都会把自己和自定义容器绑定。换句话说，这个函数组主要是给`self`模式下的按钮使用的。
 ```
-#执行者为玩家
+#执行者为玩家，需要让玩家绑定的容器发送一些信息
 
 function #tess:transfer {command:"say I_am_a_machine"}
 ```
@@ -292,7 +315,6 @@ function #tess:transfer {command:"say I_am_a_machine"}
 |操作\参数   |source    |target|说明        |
 |:------:|:--------:|:----:|:--------:|
 |add     |一个战利品表    |目标槽位  |在当前页面的指定槽位`target`添加一个ui物品`source`
-|
 |remove  |——        |目标槽位  |删除当前页面一个槽位`target`的ui物品|
 |modify  |一个物品修饰器，必须是引用|目标槽位  |在当前页面的指定槽位`target`施加一个物品修饰器`source`|
 |pop     |——        |目标槽位  |在当前页面，弹出指定槽位`target`的非ui物品，将其变为掉落物形式|
@@ -323,7 +345,7 @@ function #tess:cmd
 ```
 带有`source`参数的操作都用到了宏函数，带有`target`参数的操作都访问了实体或方块实体的 nbt 。对于性能问题，只要保证 cmd 不会高频触发就不会有卡顿。
 
-### 6. 模拟合成台
+### 6. 思路：模拟合成台
 Tess 本身没有自带的合成组件，因为我考虑到不同数据包或地图有不同的合成需求。如果想要做几乎与原版一致的工作台，我们可以使用如下的合成逻辑：
 ```json
 //在这个实例中，自定义容器的输出槽为空槽
@@ -386,11 +408,11 @@ Tess 本身没有自带的合成组件，因为我考虑到不同数据包或地
 
 另外，补充一个我在数据包层面没有解决的问题。
 
-`item_display`嵌入方块内时会变黑，因为`item_display`会渲染使用实体原点位置方块的光照，而木桶不透明（即光照为 0），箱子这种透明容器又容易互相合并、造成bug。在 Tess 中，我默认渲染的方块亮度为15，这会导致夜晚时看起来很奇怪。你可以通过`#minecraft:tess/loaded`接口来修改加载容器后，`item_display`的亮度。
+`item_display`嵌入方块内时会变黑，因为`item_display`会渲染使用实体原点位置方块的光照，而木桶不透明（即光照为 0），箱子这种透明容器又容易互相合并、造成bug。在 Tess 中，我默认渲染的方块亮度为15，这会导致夜晚时看起来很奇怪。
 
 我想到的办法是可以通过检测相邻方块的光照，来判断自定义容器渲染哪个光照。但是，这样做很复杂，而且性能不好，不同场景的需求也不一样。也许之后我找到好的办法后，会解决这个问题。
 
 ## 结尾
-总算写完文档了！这是我发布的第一个数据包，~~想不到我发布的第一个数据包会是一个轮子~~，所以难免（或者在我心里，很可能）会有各种bug和需要优化的地方。我接受一切形式的批评，如需要交流请访问我的[bilibili主页](https://space.bilibili.com/372325957?spm_id_from=333.1007.0.0)。
+总算写完文档了！这是我发布的第一个数据包，~~想不到我发布的第一个数据包会是一个轮子~~，所以难免（或者在我心里，很可能）会有各种bug和需要优化的地方。我接受一切形式的批评，如需要交流请访问我的[bilibili主页](https://space.bilibili.com/372325957)。
 
 最后，感谢你使用Tess！

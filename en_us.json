@@ -1,0 +1,3 @@
+{
+    "tess.error.no_home": "Error: The marker entity's container parameters are missing the parameter \"home\" (which is a loot_table)."
+}

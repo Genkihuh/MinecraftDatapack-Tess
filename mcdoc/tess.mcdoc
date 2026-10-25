@@ -8,9 +8,13 @@ struct tessCustomData{
     type?: CompType,
     home?: #[id="loot_table"] string,
     model?: #[id="item_definition"] string,
-    place_event?: #[command] string,
-    destroy_event?: #[command] string,
-    open_sound?: string,
+    place_event?: (#[command] string|""),
+    destroy_event?: (#[command] string|""),
+    open_sound?: #[id="sounds"] string,
+    close_sound?: #[id="sounds"] string,
+    brightness?: struct{
+        sky?:int @0..15,block?:int @0..15
+    },
     tags?:string,
     gui?:[
         struct{

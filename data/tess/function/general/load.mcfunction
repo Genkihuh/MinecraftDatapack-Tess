@@ -3,6 +3,9 @@
 	\n2.没做完Home和goto部分\
 \n纯调试信息，如果看到这个请督促作者修正\n-----------"
 
+#空命令用
+scoreboard objectives add tess.null dummy
+
 #视角偏转
 scoreboard objectives add tess.r dummy
 
