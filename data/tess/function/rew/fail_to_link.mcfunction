@@ -1,0 +1,2 @@
+kill @s
+return fail

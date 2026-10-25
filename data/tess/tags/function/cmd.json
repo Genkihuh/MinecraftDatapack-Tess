@@ -1,0 +1,12 @@
+{
+    "values": [
+        "tess:cmd/_begin",
+            "tess:cmd/add",
+            "tess:cmd/remove",
+            "tess:cmd/modify",
+            "tess:cmd/pop",
+            "tess:cmd/set_home",
+            "tess:cmd/go_home",
+        "tess:cmd/_end"
+    ]
+}

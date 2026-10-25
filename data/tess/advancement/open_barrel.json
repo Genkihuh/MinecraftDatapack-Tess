@@ -1,0 +1,32 @@
+{
+    "criteria": {
+        "tess:open_barrel":{
+            "trigger": "any_block_use",
+            "conditions": {
+                "location": "tess:special_barrel",
+                "player": {
+                    "type": "any_of",
+                    "terms": [
+                        "tess:no_hands",
+                        "tess:not_sneaking"
+                    ]
+                }
+            }
+        }
+    },
+    "display": {
+        "announce_to_chat": false,
+        "description": "打开木桶",
+        "title": "木桶监听",
+        "icon": {
+            "id": "barrel"
+        },
+        "background": "block/barrel_side",
+        "hidden": true,
+        "frame": "task",
+        "show_toast": false
+    },
+    "rewards": {
+        "function": "tess:rew/ban_barrel_sound"
+    }
+}

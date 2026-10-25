@@ -1,0 +1,102 @@
+use ::java::world::item::ItemStack
+use ::java::util::text::Text
+dispatch mcdoc:custom_data["tess"] to tessCustomData
+struct tessCustomData{
+    ///item/ui/if_ui
+    if_ui?: boolean,
+    ///item/ui/type
+    type?: CompType,
+    home?: #[id="loot_table"] string,
+    model?: #[id="item_definition"] string,
+    place_event?: #[command] string,
+    destroy_event?: #[command] string,
+    open_sound?: string,
+    tags?:string,
+    gui?:[
+        struct{
+            I: #[id="loot_table"] string
+        }
+    ],
+    page_index?: int,
+    machine_loaded?: boolean,
+    machine_name?:Text,
+    ui_origin?: [ItemStack],
+    ui_cache?: [ItemStack],
+    comp_data?: struct{
+        loaded?:boolean,x?:int,y?:int,z?:int,slot?:byte
+    },
+    machine_loot?: #[id="loot_table"] string,
+    click_event?: struct{
+        command: #[command] string,
+        mode: enum(string){
+            self="self",machine="machine"
+        }
+    },
+    to?: #[id="loot_table"] string,
+    target_ui?:string
+}
+
+dispatch minecraft:storage["tess:cmd"] to tessCmd
+type CmdQuest=struct{
+    opt:struct{
+        add?: byte,
+        remove?: byte,
+        set_home?: byte,
+        go_home?: byte,
+        pop?: byte,
+        modify?: byte
+    },
+    source?:(#[id="loot_table"] string|#[id="item_modifier"] string),
+    target?:byte
+}
+struct tessCmd{
+    x?:int,y?:int,z?:int,
+    top?:CmdQuest,
+    quests:[CmdQuest]
+}
+dispatch minecraft:storage["tess:cmd_temp"] to tessCmdTemp
+struct tessCmdTemp{
+    x?:int,y?:int,z?:int
+}
+
+
+dispatch minecraft:storage["tess:transfer"] to tessTransfer
+struct tessTransfer{
+    x?:int,y?:int,z?:int,command?:string
+}
+
+dispatch minecraft:storage["tess:temp"] to tessTemp
+struct tessTemp{
+    marker: tessCustomData,
+    home_index?: int,
+    gui: any,
+    guipos?:struct{
+        x:int,y:int,z:int
+    },
+    tp:struct{
+        r:int,x:int,y:int,z:int
+    }
+}
+dispatch minecraft:storage["tess:temp_player"] to tessTempPlayer
+struct tessTempPlayer{
+    score_pos:struct{
+        x:int,y:int,z:int
+    }
+}
+dispatch minecraft:storage["tess:temp_button"] to tessTempButton
+struct tessTempButton{
+    x:int,y:int,z:int,
+    command:#[command] string
+}
+dispatch minecraft:storage["tess:temp_goto"] to tessTempGoto
+struct tessTempGoto{
+    x:int,y:int,z:int,
+    to:#[id=loot_table] string
+}
+enum (string) CompType{
+    generator = "generator",
+    void = "void",
+    border = "border",
+    button = "button",
+    goto = "goto"
+}
