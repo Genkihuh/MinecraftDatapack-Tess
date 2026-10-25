@@ -1,1 +1,0 @@
-$item modify block ~ ~ ~ tess:if_ui {type:"set_custom_data",tag:{tess:{comp_data:{loaded:true,x:$(x),y:$(y),z:$(z)}}}}

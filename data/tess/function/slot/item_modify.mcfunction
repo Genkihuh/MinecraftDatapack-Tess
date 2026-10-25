@@ -1,1 +1,0 @@
-$execute on origin at @s run function tess:slot/modify {x:$(x),y:$(y),z:$(z),slot:$(slot)}

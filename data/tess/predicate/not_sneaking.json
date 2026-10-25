@@ -1,9 +1,0 @@
-{
-    "type": "entity_properties",
-    "predicate": {
-        "flags": {
-            "is_sneaking": false
-        }
-    },
-    "entity": "this"
-}
