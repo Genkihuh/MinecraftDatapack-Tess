@@ -13,7 +13,7 @@ tag @s add tess.entity.find
 execute at @s as @p[tag=tess.player.find] run function tess:slot/modify with entity @n[tag=tess.entity.find] item.components."minecraft:custom_data".tess.comp_data
 
 #处理点击事件
-execute if items entity @s contents *[custom_data~{tess:{type:"button"}}] as @p[tag=tess.player.find] if score @s tess.button_cd matches 0 run function tess:click/click_button with entity @n[tag=tess.entity.find,distance=..0.5] item.components."minecraft:custom_data".tess.click_event
+execute if items entity @s contents *[custom_data~{tess:{type:"button"}}] as @p[tag=tess.player.find] unless score @s tess.button_cd matches 1 run function tess:click/click_button with entity @n[tag=tess.entity.find,distance=..0.5] item.components."minecraft:custom_data".tess.click_event
 execute if items entity @s contents *[custom_data~{tess:{type:"goto"}}] as @p[tag=tess.player.find] run function tess:goto/goto
 
 #清除自身
